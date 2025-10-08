@@ -1,13 +1,21 @@
-# You can change this base image to anything else
-# But make sure to use the correct version of Java
-FROM adoptopenjdk/openjdk11:alpine-jre
+# -------- builder stage --------
+FROM maven:3.9.9-eclipse-temurin-17 AS builder
+WORKDIR /workspace
 
-# Simply the artifact path
-ARG artifact=target/spring-boot-web.jar
+# copy only the pom first to leverage docker cache for dependencies
+COPY spring-boot-app/pom.xml spring-boot-app/pom.xml
+RUN mvn -f spring-boot-app/pom.xml -B dependency:go-offline
 
-WORKDIR /opt/app
+# copy sources and build
+COPY spring-boot-app/ spring-boot-app/
+RUN mvn -f spring-boot-app/pom.xml -B -DskipTests clean package
 
-COPY ${artifact} app.jar
+# -------- runtime stage --------
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
 
-# This should not be changed
-ENTRYPOINT ["java","-jar","app.jar"]
+# copy the jar from builder (adjust if your artifact name differs)
+COPY --from=builder /workspace/spring-boot-app/target/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/app/app.jar"]
