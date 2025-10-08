@@ -1,15 +1,17 @@
-package com.abhishek;
+package com.jhalkee.controller;
 
-import com.abhishek.controller.HelloController;
-import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Map;
+import java.util.HashMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-public class HelloControllerTest {
+@RestController
+public class HelloController {
 
-    @Test
-    void helloMessageShouldContainText() {
-        HelloController controller = new HelloController();
-        var response = controller.sayHello();
-        assertThat(response.get("message")).contains("Hello");
+    @GetMapping("/hello")
+    public Map<String, String> sayHello() {
+        Map<String, String> resp = new HashMap<>();
+        resp.put("message", "Hello World");
+        return resp;
     }
 }
