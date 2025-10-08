@@ -7,6 +7,13 @@ pipeline {
     }
   }
   stages {
+    stage('Prepare') {
+      steps {
+        // Remove previous build artifacts only (safe)
+        sh 'rm -rf spring-boot-app/target || true'
+      }
+    }
+  stages {
     stage('Checkout') {
       steps {
         git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/jkjhalkee/java-app.git'
