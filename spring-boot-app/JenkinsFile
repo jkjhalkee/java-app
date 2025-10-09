@@ -65,19 +65,22 @@ pipeline {
       }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-        sh '''
-          REPO_DIR="$WORKSPACE"
+            sh '''
+                # Clone your own GitHub repo into a temp folder
+                rm -rf temp-repo
+                git clone https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git temp-repo
+                cd temp-repo
 
-          git -C "$REPO_DIR" config user.email "jkjhalkee@gmail.com"
-          git -C "$REPO_DIR" config user.name "jhalkee"
+                # Update deployment file with new image tag
+                sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yml
 
-          BUILD_NUMBER=${BUILD_NUMBER}
-          sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" "$REPO_DIR/spring-boot-app-manifests/deployment.yml"
-
-          git -C "$REPO_DIR" add spring-boot-app-manifests/deployment.yml
-          git -C "$REPO_DIR" commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-          git -C "$REPO_DIR" push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-        '''
+                # Commit and push changes
+                git config user.email "jkjhalkee@gmail.com"
+                git config user.name "jhalkee"
+                git add spring-boot-app-manifests/deployment.yml
+                git commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
+                git push origin main
+            '''
         }
       }
     }
