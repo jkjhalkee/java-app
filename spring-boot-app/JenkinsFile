@@ -65,16 +65,19 @@ pipeline {
       }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh '''
-            git -C "$WORKSPACE" config user.email "jkjhalkee@gmail.com"
-            git -C "$WORKSPACE" config user.name "jhalkee"
+        sh '''
+          # point git at the actual repo folder
+          REPO_DIR="$WORKSPACE/spring-boot-app"
 
-            BUILD_NUMBER=${BUILD_NUMBER}
-            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" "$WORKSPACE/spring-boot-app-manifests/deployment.yml"
+          git -C "$REPO_DIR" config user.email "jkjhalkee@gmail.com"
+          git -C "$REPO_DIR" config user.name "jhalkee"
 
-            git -C "$WORKSPACE" add spring-boot-app-manifests/deployment.yml
-            git -C "$WORKSPACE" commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-            git -C "$WORKSPACE" push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+          BUILD_NUMBER=${BUILD_NUMBER}
+          sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" "$WORKSPACE/spring-boot-app-manifests/deployment.yml"
+
+          git -C "$REPO_DIR" add ../spring-boot-app-manifests/deployment.yml
+          git -C "$REPO_DIR" commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
+          git -C "$REPO_DIR" push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
           '''
         }
       }
