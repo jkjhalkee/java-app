@@ -1,6 +1,6 @@
-package com.abhishek;
+package com.jhalkee.controller;
 
-import com.abhishek.controller.HelloController;
+import com.jhalkee.controller.HelloController;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
