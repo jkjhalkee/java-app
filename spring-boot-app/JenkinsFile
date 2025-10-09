@@ -66,14 +66,15 @@ pipeline {
         GIT_USER_NAME = "jkjhalkee"
       }
       steps {
+        dir('spring-boot-app') {  
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
             git config user.email "jkjhalkee@gmail.com"
             git config user.name "jhalkee"
             BUILD_NUMBER=${BUILD_NUMBER}
-            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yml
-            git add spring-boot-app-manifests/deployment.yml
-            git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" ../spring-boot-app-manifests/deployment.yml
+            git add ../spring-boot-app-manifests/deployment.yml
+            git commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
           '''
         }
